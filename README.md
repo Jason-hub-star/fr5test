@@ -38,6 +38,22 @@ PowerShell 7/.NET Core에서는 SDK 호환성 문제가 있을 수 있습니다.
 
 ## Usage
 
+가장 쉬운 사용법은 아래 한 줄입니다.
+
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File .\scripts\fr5-readonly-capture.ps1 -Ip 192.168.58.2
+```
+
+이 경우 스크립트는 아래를 자동으로 시도합니다.
+
+- `libfairino.dll` 자동 탐색
+  - 환경변수 `FAIRINO_DLL_PATH`
+  - 현재 폴더
+  - 현재 폴더의 `Assets\Plugins\Fairino\`
+  - 바탕화면 / 문서 / 다운로드
+- 저장 경로 자동 설정
+  - 바탕화면 `fr5-capture-YYYYMMDD-HHMMSS.json`
+
 ```powershell
 powershell.exe -ExecutionPolicy Bypass -File .\scripts\fr5-readonly-capture.ps1 `
   -Ip 192.168.58.2 `
@@ -54,7 +70,7 @@ $env:FAIRINO_DLL_PATH = "C:\path\to\libfairino.dll"
 powershell.exe -ExecutionPolicy Bypass -File .\scripts\fr5-readonly-capture.ps1
 ```
 
-결과는 기본적으로 `captures/` 아래 JSON으로 저장됩니다.
+결과는 기본적으로 바탕화면에 JSON으로 저장됩니다.
 
 바탕화면에 바로 저장하려면 `-OutFile`을 지정하세요.
 

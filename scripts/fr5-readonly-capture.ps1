@@ -8,6 +8,43 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Find-DllPath {
+    $candidatePaths = @(
+        $env:FAIRINO_DLL_PATH,
+        (Join-Path (Get-Location) "libfairino.dll"),
+        (Join-Path (Get-Location) "Assets\\Plugins\\Fairino\\libfairino.dll"),
+        (Join-Path $env:USERPROFILE "Desktop\\libfairino.dll"),
+        (Join-Path $env:USERPROFILE "Documents\\libfairino.dll"),
+        (Join-Path $env:USERPROFILE "Downloads\\libfairino.dll")
+    )
+
+    foreach ($candidate in $candidatePaths) {
+        if (-not [string]::IsNullOrWhiteSpace($candidate) -and (Test-Path $candidate -PathType Leaf)) {
+            return [System.IO.Path]::GetFullPath($candidate)
+        }
+    }
+
+    $searchRoots = @(
+        (Join-Path $env:USERPROFILE "Desktop"),
+        (Join-Path $env:USERPROFILE "Documents"),
+        (Join-Path $env:USERPROFILE "Downloads")
+    )
+
+    foreach ($root in $searchRoots) {
+        if (-not (Test-Path $root -PathType Container)) {
+            continue
+        }
+
+        $found = Get-ChildItem -Path $root -Filter libfairino.dll -Recurse -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+        if ($null -ne $found) {
+            return $found.FullName
+        }
+    }
+
+    return $null
+}
+
 function Resolve-InputDefaults {
     if ([string]::IsNullOrWhiteSpace($script:Ip)) {
         $script:Ip = $env:FAIRINO_IP
@@ -24,10 +61,10 @@ function Resolve-InputDefaults {
     }
 
     if ([string]::IsNullOrWhiteSpace($script:DllPath)) {
-        $script:DllPath = $env:FAIRINO_DLL_PATH
+        $script:DllPath = Find-DllPath
     }
     if ([string]::IsNullOrWhiteSpace($script:DllPath)) {
-        throw "DllPath is required. Pass -DllPath or set FAIRINO_DLL_PATH."
+        throw "libfairino.dll not found automatically. Pass -DllPath, set FAIRINO_DLL_PATH, or place the DLL in a common location such as Desktop/Documents/Downloads."
     }
     if ((Split-Path $script:DllPath -Leaf) -ne "libfairino.dll" -and (Test-Path $script:DllPath -PathType Container)) {
         $script:DllPath = Join-Path $script:DllPath "libfairino.dll"
@@ -39,8 +76,7 @@ function Resolve-InputDefaults {
     }
 
     if ([string]::IsNullOrWhiteSpace($script:OutFile)) {
-        $capturesDir = Join-Path (Split-Path $PSScriptRoot -Parent) "captures"
-        New-Item -ItemType Directory -Force -Path $capturesDir | Out-Null
+        $capturesDir = Join-Path $env:USERPROFILE "Desktop"
         $timestamp = (Get-Date).ToString("yyyyMMdd-HHmmss")
         $script:OutFile = Join-Path $capturesDir "fr5-capture-$timestamp.json"
     }
