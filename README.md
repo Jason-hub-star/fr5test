@@ -56,6 +56,16 @@ powershell.exe -ExecutionPolicy Bypass -File .\scripts\fr5-readonly-capture.ps1
 
 결과는 기본적으로 `captures/` 아래 JSON으로 저장됩니다.
 
+바탕화면에 바로 저장하려면 `-OutFile`을 지정하세요.
+
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File .\scripts\fr5-readonly-capture.ps1 `
+  -Ip 192.168.58.2 `
+  -Port 8080 `
+  -DllPath "C:\path\to\libfairino.dll" `
+  -OutFile "$env:USERPROFILE\Desktop\fr5-capture.json"
+```
+
 ## Output
 
 JSON에는 아래가 포함됩니다.
