@@ -54,6 +54,22 @@ powershell.exe -ExecutionPolicy Bypass -File .\scripts\fr5-readonly-capture.ps1 
 - 저장 경로 자동 설정
   - 바탕화면 `fr5-capture-YYYYMMDD-HHMMSS.json`
 
+5분 동안 연속 기록하려면 아래 한 줄을 쓰세요.
+
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File .\scripts\fr5-readonly-record.ps1 -Ip 192.168.58.2
+```
+
+이 경우 스크립트는:
+
+- `libfairino.dll` 자동 탐색
+- 바탕화면에 `fr5-record-YYYYMMDD-HHMMSS.jsonl` 생성
+- 5분 동안 기록
+- 5분 후 자동 종료
+
+즉, 네. 5분이 지나면 스크립트는 자동으로 끝나고, 저장 파일은 바탕화면에 보입니다.
+기록 중에도 파일은 이미 생성되어 있고 계속 커집니다.
+
 ```powershell
 powershell.exe -ExecutionPolicy Bypass -File .\scripts\fr5-readonly-capture.ps1 `
   -Ip 192.168.58.2 `
@@ -93,6 +109,12 @@ JSON에는 아래가 포함됩니다.
 - tool coordinate / wobj coordinate
 - fault / safety
 - drag teach 상태
+
+`fr5-readonly-record.ps1`는 `jsonl` 형식으로 저장합니다.
+
+- 한 줄당 한 샘플
+- 기록 중에도 파일이 보임
+- 중간에 끊겨도 앞부분 데이터 보존
 
 ## Notes
 
