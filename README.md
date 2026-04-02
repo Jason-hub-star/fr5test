@@ -1,0 +1,75 @@
+# FR5 Read-Only Capture
+
+FAIRINO FR5 controller state를 `read-only`로 캡처해 JSON으로 저장하는 PowerShell 유틸입니다.
+
+이 저장소의 목표는 아래 순서만 안전하게 수행하는 것입니다.
+
+1. `Connect`
+2. `GetVersion`
+3. `GetRobotRealTimeState`
+4. `GetActualJointPosDegree`
+5. `GetActualTCPPose`
+6. `GetSafetyCode`
+7. `GetRobotRealtimeStateSamplePeriod`
+8. `GetActualTCPNum`
+9. `GetActualWObjNum`
+10. `GetCurToolCoord`
+11. `GetCurWObjCoord`
+12. `GetRobotErrorCode`
+13. `GetSafetyStopState`
+14. `IsInDragTeach`
+15. `Disconnect`
+
+`MoveJ`, `MoveL`, jog 계열 명령은 포함하지 않습니다.
+
+## Safety
+
+- 첫 세션은 반드시 `read-only capture`만 수행하세요.
+- pendant / e-stop / 현장 승인 없이 모션 명령을 보내지 마세요.
+- 유선 LAN 연결을 권장합니다.
+
+## Requirements
+
+- `Windows PowerShell 5.1` 권장
+- 동료 PC에 접근 가능한 `libfairino.dll`
+- 로봇 컨트롤러와 같은 subnet
+
+PowerShell 7/.NET Core에서는 SDK 호환성 문제가 있을 수 있습니다.
+
+## Usage
+
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File .\scripts\fr5-readonly-capture.ps1 `
+  -Ip 192.168.58.2 `
+  -Port 8080 `
+  -DllPath "C:\path\to\libfairino.dll"
+```
+
+환경 변수로도 줄 수 있습니다.
+
+```powershell
+$env:FAIRINO_IP = "192.168.58.2"
+$env:FAIRINO_PORT = "8080"
+$env:FAIRINO_DLL_PATH = "C:\path\to\libfairino.dll"
+powershell.exe -ExecutionPolicy Bypass -File .\scripts\fr5-readonly-capture.ps1
+```
+
+결과는 기본적으로 `captures/` 아래 JSON으로 저장됩니다.
+
+## Output
+
+JSON에는 아래가 포함됩니다.
+
+- 연결 성공/실패
+- SDK / software / firmware version
+- realtime joint / tcp / tool / user / enable / mode / emergency stop
+- fallback joint / tcp getter 값
+- tool coordinate / wobj coordinate
+- fault / safety
+- drag teach 상태
+
+## Notes
+
+- `RPC`는 공식 SDK 기준으로 `ip`만 받습니다.
+- `port` 인자는 메타데이터로만 저장되며 SDK 호출에는 직접 쓰지 않습니다.
+- 캡처 결과는 원본 evidence입니다. 이 값을 곧바로 SSOT로 취급하지 말고, 검토 후 정규화 문서에 반영하세요.
